@@ -30,7 +30,7 @@ Finally, double-click on the jar file.
 
 ### The bot just doesn't launch
 
-You need Java to run the bot, since it's a Jar file. Download Java here: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+You need Java to run the bot, since it's a `jar` file. Download Java here: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 Most users need the JRE. If you want to help developing the bot, you need the JDK.
 
@@ -55,4 +55,4 @@ Also set the *Start in* folder to: ```"C:\path\to\the\bot"```.
 
 ### I deleted my mighty.properties file. I need a new one.
 
-You can find the default mighty.properties file here: https://github.com/AllInOneMighty/ytg-mighty-bot/blob/master/src/main/defaults/mighty.properties
+You can find the default `mighty.properties` file here: https://github.com/AllInOneMighty/ytg-mighty-bot/blob/master/src/main/defaults/mighty.properties
