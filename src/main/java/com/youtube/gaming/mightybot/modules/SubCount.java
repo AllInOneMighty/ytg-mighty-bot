@@ -22,6 +22,7 @@ import com.youtube.gaming.mightybot.Module;
 import com.youtube.gaming.mightybot.exceptions.InvalidConfigurationException;
 import com.youtube.gaming.mightybot.properties.MightyProperty;
 
+/** Outputs the user's channel number of subscribers to a specified file on the computer. */
 public class SubCount extends Module {
   private static final Logger logger = LoggerFactory.getLogger(SubCount.class);
 

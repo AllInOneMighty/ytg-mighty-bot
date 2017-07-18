@@ -30,6 +30,11 @@ import com.youtube.gaming.mightybot.Module;
 import com.youtube.gaming.mightybot.exceptions.InvalidConfigurationException;
 import com.youtube.gaming.mightybot.properties.MightyProperty;
 
+/**
+ * Posts a message in chat on behalf of the user when someone subscribes to the channel. Saves the
+ * names of the new subscribers while the bot is running to avoid announcing the same name several
+ * times. This list is reset when the bot is stopped.
+ */
 public class NewSubChatAnnouncer extends Module {
   private static final Logger logger = LoggerFactory.getLogger(NewSubChatAnnouncer.class);
   private static final Random r = new Random();

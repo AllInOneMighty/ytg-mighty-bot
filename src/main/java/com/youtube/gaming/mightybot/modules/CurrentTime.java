@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.youtube.gaming.mightybot.MightyContext;
 import com.youtube.gaming.mightybot.Module;
 
+/** Outputs the current time in a specified file on the computer. */
 public class CurrentTime extends Module {
   private static final Logger logger = LoggerFactory.getLogger(CurrentTime.class);
 
