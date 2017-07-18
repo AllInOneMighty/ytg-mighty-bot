@@ -52,7 +52,7 @@ public class NewSubChatAnnouncer extends Module {
   public void checkProperties() throws InvalidConfigurationException {
     getProperties().throwIfNullOrEmpty(INTERVAL, "Interval can't be empty");
     if (getProperties().getInt(INTERVAL) < MINIMUM_INTERVAL) {
-      throw new InvalidConfigurationException(getProperties().prefix(INTERVAL),
+      throw new InvalidConfigurationException(getProperties().addPrefix(INTERVAL),
           "Interval can't be less than 5s");
     }
 
@@ -70,7 +70,7 @@ public class NewSubChatAnnouncer extends Module {
       logger.info(
           "You can ignore persistent broadcasts (gaming.youtube.com/channel/live/) by "
               + "setting the property {} to false",
-          getProperties().prefix(IGNORE_PERSISTENT_BROADCASTS));
+          getProperties().addPrefix(IGNORE_PERSISTENT_BROADCASTS));
     }
   }
 

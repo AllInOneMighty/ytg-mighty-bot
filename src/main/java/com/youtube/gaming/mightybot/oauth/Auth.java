@@ -27,6 +27,9 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.youtube.gaming.mightybot.properties.MightyProperties;
 import com.youtube.gaming.mightybot.util.DynamicPath;
 
+/**
+ * Provides an easy access to {@link Credential}s for user identification with the YouTube API.
+ */
 public class Auth {
   private static final Logger logger = LoggerFactory.getLogger(MightyProperties.class);
 

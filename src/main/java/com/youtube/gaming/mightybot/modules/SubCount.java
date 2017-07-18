@@ -61,7 +61,7 @@ public class SubCount extends Module {
     }
     getProperties().throwIfNullOrEmpty(INTERVAL, "Interval can't be empty");
     if (getProperties().getInt(INTERVAL) < MINIMUM_INTERVAL) {
-      throw new InvalidConfigurationException(getProperties().prefix(INTERVAL),
+      throw new InvalidConfigurationException(getProperties().addPrefix(INTERVAL),
           "Interval can't be less than 5s");
     }
   }

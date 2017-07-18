@@ -23,9 +23,17 @@ import com.youtube.gaming.mightybot.oauth.Auth;
 import com.youtube.gaming.mightybot.properties.MightyProperties;
 import com.youtube.gaming.mightybot.properties.MightyProperty;
 
+/**
+ * A modular and mighty YouTube Gaming bot.
+ */
 public class YouTubeGamingMightyBot {
   private static final Logger logger = LoggerFactory.getLogger(YouTubeGamingMightyBot.class);
 
+  /**
+   * Time to wait between each run of the main loop. This time will be added after the main loop has
+   * run, which means if the main loop takes 3,000 millis to run, the next loop will run 4,000
+   * millis after it originally started.
+   */
   private static final long MAIN_LOOP_CYCLE_MILLIS = 1000;
 
   public static void main(String[] args) {
@@ -120,6 +128,7 @@ public class YouTubeGamingMightyBot {
     }
   }
 
+  /** Checks that the mandatory properties are present in the given properties file. */
   private static void doGlobalConfigurationChecks(MightyProperties properties) {
     for (MightyProperty property : MightyProperty.values()) {
       properties.throwIfNullOrEmpty(property, "Property can't be empty");
