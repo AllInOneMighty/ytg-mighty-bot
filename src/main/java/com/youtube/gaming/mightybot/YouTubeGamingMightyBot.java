@@ -65,8 +65,7 @@ public class YouTubeGamingMightyBot {
           requiredOauthScopes.addAll(module.getRequiredOauthScopes());
         }
       } else {
-        logger.info(String.format("%s is disabled ('%s' != true)", module.getName(),
-            module.getEnabledProperty()));
+        logger.info("{} is disabled ('{}' != true)", module.getName(), module.getEnabledProperty());
       }
     }
 

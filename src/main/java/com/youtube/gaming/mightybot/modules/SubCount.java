@@ -82,8 +82,7 @@ public class SubCount extends Module {
     }
 
     // Displaying startup information
-    logger.info(
-        String.format("Writing sub count to file: %s", outputPath.toAbsolutePath().toString()));
+    logger.info("Writing sub count to file: {}", outputPath.toAbsolutePath().toString());
   }
 
   private void updateFormat() {

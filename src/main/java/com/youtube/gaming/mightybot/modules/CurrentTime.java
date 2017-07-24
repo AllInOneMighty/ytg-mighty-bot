@@ -52,8 +52,7 @@ public class CurrentTime extends Module {
     outputPath = Paths.get(getProperties().get(OUTPUT_FILE));
 
     // Displaying startup information
-    logger.info(
-        String.format("Writing current time to file: %s", outputPath.toAbsolutePath().toString()));
+    logger.info("Writing current time to file: {}", outputPath.toAbsolutePath().toString());
   }
 
   @Override
