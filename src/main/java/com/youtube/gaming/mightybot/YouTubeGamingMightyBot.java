@@ -16,6 +16,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.common.collect.ImmutableList;
 import com.youtube.gaming.mightybot.exceptions.InvalidConfigurationException;
+import com.youtube.gaming.mightybot.modules.ConcurrentViewsAndLikes;
 import com.youtube.gaming.mightybot.modules.CurrentTime;
 import com.youtube.gaming.mightybot.modules.NewSubChatAnnouncer;
 import com.youtube.gaming.mightybot.modules.SubCount;
@@ -52,7 +53,8 @@ public class YouTubeGamingMightyBot {
     ImmutableList<Module> modules = ImmutableList.of(
         new SubCount(),
         new CurrentTime(),
-        new NewSubChatAnnouncer());
+        new NewSubChatAnnouncer(),
+        new ConcurrentViewsAndLikes());
     Set<String> requiredOauthScopes = new HashSet<>();
     boolean atLeastOneModuleEnabled = false;
     for (Module module : modules) {

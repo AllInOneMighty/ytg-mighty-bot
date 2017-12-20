@@ -17,10 +17,12 @@ import org.slf4j.LoggerFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.ChannelListResponse;
+import com.google.common.base.Optional;
 import com.youtube.gaming.mightybot.MightyContext;
 import com.youtube.gaming.mightybot.Module;
 import com.youtube.gaming.mightybot.exceptions.InvalidConfigurationException;
 import com.youtube.gaming.mightybot.properties.MightyProperty;
+import com.youtube.gaming.mightybot.util.ModuleUtils;
 
 /** Outputs the user's channel number of subscribers to a specified file on the computer. */
 public class SubCount extends Module {
@@ -37,19 +39,8 @@ public class SubCount extends Module {
 
   @Override
   public void checkProperties() {
-    getProperties().throwIfNullOrEmpty(OUTPUT_FILE, "Output file can't be empty.");
-    Path outputPath = Paths.get(getProperties().get(OUTPUT_FILE));
-    if (!Files.exists(outputPath)) {
-      try {
-        Files.createFile(outputPath);
-      } catch (IOException e) {
-        throw new RuntimeException(String.format("Could not create output file: %s", outputPath),
-            e);
-      }
-    }
-    if (!Files.isWritable(outputPath)) {
-      throw new RuntimeException(String.format("Output file is not writeable: %s", outputPath));
-    }
+    ModuleUtils.assertModuleFileExistsAndWriteable(getProperties(), OUTPUT_FILE, Optional.absent());
+
     getProperties().throwIfNullOrEmpty(FORMAT_INPUT_FILE, "Format input file can't be empty.");
     Path formatInputPath = Paths.get(getProperties().get(FORMAT_INPUT_FILE));
     if (!Files.exists(formatInputPath)) {

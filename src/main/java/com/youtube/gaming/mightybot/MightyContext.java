@@ -10,8 +10,9 @@ import com.google.common.base.Preconditions;
  * the bot modules.
  */
 public class MightyContext {
-  private YouTube youTube;
-  private Clock clock;
+  private final YouTube youTube;
+  private final YouTubeHelper youTubeHelper;
+  private final Clock clock;
 
   /**
    * Creates a new mighty context with the given {@link YouTube} API and clock. The API needs to be
@@ -22,11 +23,16 @@ public class MightyContext {
    */
   MightyContext(YouTube youTube, Clock clock) {
     this.youTube = Preconditions.checkNotNull(youTube);
+    this.youTubeHelper = new YouTubeHelper(youTube, clock);
     this.clock = Preconditions.checkNotNull(clock);
   }
 
   public YouTube youTube() {
     return youTube;
+  }
+
+  public YouTubeHelper youTubeHelper() {
+    return youTubeHelper;
   }
 
   public Clock clock() {

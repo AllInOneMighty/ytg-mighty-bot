@@ -17,7 +17,6 @@ import com.google.api.client.util.DateTime;
 import com.google.api.client.util.Strings;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.LiveBroadcast;
-import com.google.api.services.youtube.model.LiveBroadcastListResponse;
 import com.google.api.services.youtube.model.LiveChatMessage;
 import com.google.api.services.youtube.model.LiveChatMessageSnippet;
 import com.google.api.services.youtube.model.LiveChatTextMessageDetails;
@@ -39,19 +38,15 @@ public class NewSubChatAnnouncer extends Module {
   private static final Logger logger = LoggerFactory.getLogger(NewSubChatAnnouncer.class);
   private static final Random r = new Random();
 
-  private static final long LIVE_CHAT_IDS_REFRESH_CYCLE_MILLIS = 60000;
   private static final String IGNORE_PERSISTENT_BROADCASTS = "ignorePersistentBroadcasts";
   private static final String INTERVAL = "interval";
   private static final int MINIMUM_INTERVAL = 5;
   private static final String MESSAGES_PREFIX = "message";
-  private static final List<String> BROADCAST_ACTIVE_LIFE_CYCLES =
-      ImmutableList.of("ready", "testing", "liveStarting", "live");
 
   private Set<String> alreadySubscribedCache = new HashSet<String>();
   private List<String> messages;
   private DateTime lastPublishedAt;
   private ImmutableList<String> liveChatIds = ImmutableList.of();
-  private DateTime lastLiveChatIdsRefresh = new DateTime(0);
 
   @Override
   public void checkProperties() throws InvalidConfigurationException {
@@ -74,7 +69,7 @@ public class NewSubChatAnnouncer extends Module {
     if (Strings.isNullOrEmpty(getProperties().get(IGNORE_PERSISTENT_BROADCASTS))) {
       logger.info(
           "You can ignore persistent broadcasts (gaming.youtube.com/channel/live/) by "
-              + "setting the property {} to false",
+              + "setting the property {} to true",
           getProperties().addPrefix(IGNORE_PERSISTENT_BROADCASTS));
     }
   }
@@ -99,11 +94,8 @@ public class NewSubChatAnnouncer extends Module {
   public void run(MightyContext context) throws Exception {
     List<String> newSubscribers = getNewSubscribers(context);
 
-    if (!newSubscribers.isEmpty()) {
-      if (context.clock().millis()
-          - lastLiveChatIdsRefresh.getValue() > LIVE_CHAT_IDS_REFRESH_CYCLE_MILLIS) {
-        updateActiveLiveChatIds(context);
-      }
+    if (newSubscribers.isEmpty()) {
+      updateActiveLiveChatIds(context);
 
       if (liveChatIds.isEmpty()) {
         if (shouldIgnorePersistentBroadcasts()) {
@@ -164,41 +156,30 @@ public class NewSubChatAnnouncer extends Module {
   }
 
   private void updateActiveLiveChatIds(MightyContext context) {
-    logger.info("Refreshing live chat ids");
     try {
       List<String> activeLiveChatIds = new ArrayList<>();
 
       if (!shouldIgnorePersistentBroadcasts()) {
         // Persistent broadcasts
-        YouTube.LiveBroadcasts.List permanentRequest =
-            context.youTube().liveBroadcasts().list("snippet,status");
-        permanentRequest.setBroadcastType("persistent");
-        permanentRequest.setMine(Boolean.TRUE);
-        LiveBroadcastListResponse permanentResponse = permanentRequest.execute();
-        activeLiveChatIds.addAll(getActiveLiveChatIds(permanentResponse.getItems()));
+        List<LiveBroadcast> activePermanentBroadcasts =
+            context.youTubeHelper().getActivePersistentBroadcasts();
+        activeLiveChatIds.addAll(getLiveChatIds(activePermanentBroadcasts));
       }
 
       // Active broadcasts
-      YouTube.LiveBroadcasts.List activeRequest =
-          context.youTube().liveBroadcasts().list("snippet,status");
-      activeRequest.setBroadcastStatus("active");
-      LiveBroadcastListResponse activeResponse = activeRequest.execute();
-      activeLiveChatIds.addAll(getActiveLiveChatIds(activeResponse.getItems()));
+      List<LiveBroadcast> activeBroadcasts = context.youTubeHelper().getActiveBroadcasts();
+      activeLiveChatIds.addAll(getLiveChatIds(activeBroadcasts));
 
       liveChatIds = ImmutableList.copyOf(activeLiveChatIds);
-
-      lastLiveChatIdsRefresh = new DateTime(context.clock().millis());
     } catch (IOException e) {
       logger.error("Could not refresh live chat ids", e);
     }
   }
 
-  private List<String> getActiveLiveChatIds(List<LiveBroadcast> liveBroadcasts) {
+  private List<String> getLiveChatIds(List<LiveBroadcast> liveBroadcasts) {
     List<String> recordingLiveChatIds = new ArrayList<>();
     for (LiveBroadcast liveBroadcast : liveBroadcasts) {
-      if (BROADCAST_ACTIVE_LIFE_CYCLES.contains(liveBroadcast.getStatus().getLifeCycleStatus())) {
-        recordingLiveChatIds.add(liveBroadcast.getSnippet().getLiveChatId());
-      }
+      recordingLiveChatIds.add(liveBroadcast.getSnippet().getLiveChatId());
     }
     return recordingLiveChatIds;
   }

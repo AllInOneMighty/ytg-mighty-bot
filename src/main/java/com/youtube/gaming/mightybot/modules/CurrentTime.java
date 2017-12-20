@@ -15,8 +15,10 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.youtube.gaming.mightybot.MightyContext;
 import com.youtube.gaming.mightybot.Module;
+import com.youtube.gaming.mightybot.util.ModuleUtils;
 
 /** Outputs the current time in a specified file on the computer. */
 public class CurrentTime extends Module {
@@ -32,19 +34,7 @@ public class CurrentTime extends Module {
   public void checkProperties() {
     simpleDateFormat = new SimpleDateFormat(SIMPLE_DATE_FORMAT);
 
-    getProperties().throwIfNullOrEmpty(OUTPUT_FILE, "Output file can't be empty.");
-    Path outputPath = Paths.get(getProperties().get(OUTPUT_FILE));
-    if (!Files.exists(outputPath)) {
-      try {
-        Files.createFile(outputPath);
-      } catch (IOException e) {
-        throw new RuntimeException(String.format("Could not create output file: %s", outputPath),
-            e);
-      }
-    }
-    if (!Files.isWritable(outputPath)) {
-      throw new RuntimeException(String.format("Output file is not writeable: %s", outputPath));
-    }
+    ModuleUtils.assertModuleFileExistsAndWriteable(getProperties(), OUTPUT_FILE, Optional.absent());
   }
 
   @Override
