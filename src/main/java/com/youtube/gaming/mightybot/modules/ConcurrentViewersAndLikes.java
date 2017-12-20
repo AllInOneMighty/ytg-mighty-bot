@@ -28,8 +28,12 @@ import com.youtube.gaming.mightybot.exceptions.InvalidConfigurationException;
 import com.youtube.gaming.mightybot.properties.MightyProperty;
 import com.youtube.gaming.mightybot.util.ModuleUtils;
 
-public class ConcurrentViewsAndLikes extends Module {
-  private static final Logger logger = LoggerFactory.getLogger(ConcurrentViewsAndLikes.class);
+/**
+ * Outputs the concurrent viewers and likes of persistent and non-persistent broadcast in specified
+ * files on the computer.
+ */
+public class ConcurrentViewersAndLikes extends Module {
+  private static final Logger logger = LoggerFactory.getLogger(ConcurrentViewersAndLikes.class);
 
   private static final String IGNORE_PERSISTENT_BROADCASTS = "ignorePersistentBroadcasts";
   private static final String PERSISTENT_CONCURRENT_VIEWERS_OUTPUT_FILE =
