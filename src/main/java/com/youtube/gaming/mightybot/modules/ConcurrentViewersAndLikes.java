@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.api.client.util.Strings;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.LiveBroadcast;
 import com.google.api.services.youtube.model.Video;
@@ -52,15 +51,6 @@ public class ConcurrentViewersAndLikes extends Module {
 
   @Override
   public void checkProperties() throws InvalidConfigurationException {
-    if (Strings.isNullOrEmpty(getProperties().get(IGNORE_PERSISTENT_BROADCASTS))) {
-      logger.info(
-          "You can ignore persistent broadcasts (gaming.youtube.com/channel/live/) by "
-              + "setting the property {} to true",
-          getProperties().addPrefix(IGNORE_PERSISTENT_BROADCASTS));
-    } else if (!shouldIgnorePersistentBroadcasts()) {
-
-    }
-
     ModuleUtils.assertModuleFileExistsAndWriteable(getProperties(),
         NON_PERSISTENT_CONCURRENT_VIEWERS_OUTPUT_FILE,
         Optional.of("concurrent viewers for non-persistent streams"));

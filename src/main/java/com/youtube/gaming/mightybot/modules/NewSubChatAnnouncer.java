@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.client.util.DateTime;
-import com.google.api.client.util.Strings;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.LiveBroadcast;
 import com.google.api.services.youtube.model.LiveChatMessage;
@@ -64,13 +63,6 @@ public class NewSubChatAnnouncer extends Module {
         throw new InvalidConfigurationException(String.format(
             "There must be one and only one occurrence of '%%s' in your message: '%s'", message));
       }
-    }
-
-    if (Strings.isNullOrEmpty(getProperties().get(IGNORE_PERSISTENT_BROADCASTS))) {
-      logger.info(
-          "You can ignore persistent broadcasts (gaming.youtube.com/channel/live/) by "
-              + "setting the property {} to true",
-          getProperties().addPrefix(IGNORE_PERSISTENT_BROADCASTS));
     }
   }
 
