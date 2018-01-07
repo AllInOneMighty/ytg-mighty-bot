@@ -40,8 +40,9 @@ public class YouTubeHelper {
    * the channel. An active broadcast is in one of the {@link #BROADCAST_ACTIVE_LIFE_CYCLES} states.
    * Returned broadcast are requested using the {@code "snippet,status"} parts.
    * <p>
-   * The helper caches the list for 60 seconds, and will hold off on refreshing the data after this
-   * time is expired until the method is called again.
+   * The helper caches the list for {@link #ACTIVE_BROADCASTS_REFRESH_CYCLE_MILLIS} seconds, and
+   * will hold off on refreshing the data after this time is expired until the method is called
+   * again.
    * <p>
    * This method will only work in a module that requested the
    * {@code https://www.googleapis.com/auth/youtube} OAuth scope.
@@ -69,8 +70,9 @@ public class YouTubeHelper {
    * in one of the {@link #BROADCAST_ACTIVE_LIFE_CYCLES} states. Returned broadcast are requested
    * using the {@code "snippet,status"} parts.
    * <p>
-   * The helper caches the list for 60 seconds, and will hold off on refreshing the data after this
-   * time is expired until the method is called again.
+   * The helper caches the list for {@link #ACTIVE_PERSISTENT_BROADCASTS_REFRESH_CYCLE_MILLIS}
+   * seconds, and will hold off on refreshing the data after this time is expired until the method
+   * is called again.
    * <p>
    * This method will only work in a module that requested the
    * {@code https://www.googleapis.com/auth/youtube} OAuth scope.
