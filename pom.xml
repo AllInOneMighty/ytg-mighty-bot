@@ -24,12 +24,12 @@
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-youtube</artifactId>
-      <version>v3-rev182-1.22.0</version>
+      <version>v3-rev189-1.23.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.oauth-client</groupId>
       <artifactId>google-oauth-client-jetty</artifactId>
-      <version>1.22.0</version>
+      <version>1.23.0</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.13</version>
+      <version>1.7.25</version>
     </dependency>
   </dependencies>
   
