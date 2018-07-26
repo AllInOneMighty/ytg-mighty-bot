@@ -69,13 +69,15 @@ public class CurrentLiveBroadcastTitle extends Module {
   @Override
   public void run(MightyContext context) throws Exception {
     LiveBroadcast mostRecentLiveBroadcast = getMostRecentLiveBroadcast(context);
+    String title = "";
     if (mostRecentLiveBroadcast == null) {
       logger.info("No live broadcast found (an active broadcast isn't necessarily live).");
-      return;
+    } else {
+      title = mostRecentLiveBroadcast.getSnippet().getTitle();
     }
 
     try (BufferedWriter writer = Files.newBufferedWriter(currentVideoTitleOutputPath)) {
-      writer.write(mostRecentLiveBroadcast.getSnippet().getTitle());
+      writer.write(title);
     } catch (FileSystemException e) {
       logger.warn("Output writing of current live broadcast title failed. Skipping...", e);
     }
