@@ -114,7 +114,7 @@ public class SubCount extends Module {
 
     // Writing output
     try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
-      writer.write(String.format(format, subscriberCount));
+      writer.write(format.replace("{subs}", subscriberCount));
     } catch (FileSystemException e) {
       logger.warn("Output writing failed. Skipping...");
     }

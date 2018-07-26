@@ -58,10 +58,11 @@ public class NewSubChatAnnouncer extends Module {
     getProperties().throwIfNoneByPrefix(MESSAGES_PREFIX);
     List<String> messages = getProperties().getByPrefix(MESSAGES_PREFIX);
     for (String message : messages) {
-      int firstMatch = message.indexOf("%s");
-      if (firstMatch == -1 || firstMatch != message.lastIndexOf("%s")) {
+      int firstMatch = message.indexOf("{name}");
+      if (firstMatch == -1 || firstMatch != message.lastIndexOf("{name}")) {
         throw new InvalidConfigurationException(String.format(
-            "There must be one and only one occurrence of '%%s' in your message: '%s'", message));
+            "There must be one and only one occurrence of '{name}' in your message: '%s'",
+            message));
       }
     }
   }
@@ -184,7 +185,7 @@ public class NewSubChatAnnouncer extends Module {
             .setLiveChatId(liveChatId)
             .setType("textMessageEvent")
             .setTextMessageDetails(new LiveChatTextMessageDetails()
-                .setMessageText(String.format(message, subscriberName))));
+                .setMessageText(message.replace("{name}", subscriberName))));
 
     YouTube.LiveChatMessages.Insert request =
         context.youTube().liveChatMessages().insert("snippet", content);

@@ -80,22 +80,17 @@ public class YouTubeGamingMightyBot {
     // Initialize YouTube
     YouTube youTube;
     try {
-      if (requiredOauthScopes.isEmpty()) {
-        youTube = new YouTube.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(),
-                JacksonFactory.getDefaultInstance(),
-                null)
-            .setApplicationName(properties.get(MightyProperty.PROJECT_ID))
-            .build();
-      } else {
-        Credential credential = Auth.authorize(new ArrayList<>(requiredOauthScopes), "mightybot");
-        youTube = new YouTube.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(),
-                JacksonFactory.getDefaultInstance(),
-                credential)
-            .setApplicationName(properties.get(MightyProperty.PROJECT_ID))
-            .build();
+      Credential credential = null;
+      if (!requiredOauthScopes.isEmpty()) {
+        credential= Auth.authorize(new ArrayList<>(requiredOauthScopes), "mightybot");
       }
+
+      youTube = new YouTube.Builder(
+            GoogleNetHttpTransport.newTrustedTransport(),
+            JacksonFactory.getDefaultInstance(),
+            credential)
+        .setApplicationName(properties.get(MightyProperty.PROJECT_ID))
+        .build();
     } catch (IOException | GeneralSecurityException e) {
       logger.error("Could not initialize the YouTube API.", e);
       return;
