@@ -37,7 +37,6 @@ public class NewSubChatAnnouncer extends Module {
   private static final Logger logger = LoggerFactory.getLogger(NewSubChatAnnouncer.class);
   private static final Random r = new Random();
 
-  private static final String IGNORE_PERSISTENT_BROADCASTS = "ignorePersistentBroadcasts";
   private static final String INTERVAL = "interval";
   private static final int MINIMUM_INTERVAL = 5;
   private static final String MESSAGES_PREFIX = "message";
@@ -194,6 +193,7 @@ public class NewSubChatAnnouncer extends Module {
   }
 
   private boolean shouldIgnorePersistentBroadcasts() {
-    return "true".equalsIgnoreCase(getProperties().get(IGNORE_PERSISTENT_BROADCASTS));
+    return "true"
+        .equalsIgnoreCase(getProperties().get(MightyProperty.IGNORE_PERSISTENT_BROADCASTS));
   }
 }

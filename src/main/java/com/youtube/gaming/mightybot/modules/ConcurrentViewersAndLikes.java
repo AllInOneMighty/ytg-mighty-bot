@@ -34,7 +34,6 @@ import com.youtube.gaming.mightybot.util.ModuleUtils;
 public class ConcurrentViewersAndLikes extends Module {
   private static final Logger logger = LoggerFactory.getLogger(ConcurrentViewersAndLikes.class);
 
-  private static final String IGNORE_PERSISTENT_BROADCASTS = "ignorePersistentBroadcasts";
   private static final String PERSISTENT_CONCURRENT_VIEWERS_OUTPUT_FILE =
       "persistent.concurrentViewers.outputFile";
   private static final String PERSISTENT_LIKES_OUTPUT_FILE = "persistent.likes.outputFile";
@@ -65,7 +64,7 @@ public class ConcurrentViewersAndLikes extends Module {
           Optional.of("concurrent viewers for persistent streams"));
       ModuleUtils.assertModuleFileExistsAndWriteable(getProperties(),
           PERSISTENT_LIKES_OUTPUT_FILE,
-          Optional.of("likes  for persistent streams"));
+          Optional.of("likes for persistent streams"));
     }
 
     getProperties().throwIfNullOrEmpty(INTERVAL, "Interval can't be empty");
@@ -187,7 +186,8 @@ public class ConcurrentViewersAndLikes extends Module {
   }
 
   private boolean shouldIgnorePersistentBroadcasts() {
-    return "true".equalsIgnoreCase(getProperties().get(IGNORE_PERSISTENT_BROADCASTS));
+    return "true"
+        .equalsIgnoreCase(getProperties().get(MightyProperty.IGNORE_PERSISTENT_BROADCASTS));
   }
 
 }

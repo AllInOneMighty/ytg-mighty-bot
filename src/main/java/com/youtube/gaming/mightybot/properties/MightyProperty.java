@@ -16,7 +16,9 @@ public enum MightyProperty {
    * API key as shown on <a href="https://console.developers.google.com/apis/credentials">Google
    * APIs Credentials</a>.
    */
-  API_KEY("apiKey");
+  API_KEY("apiKey"),
+  /** Whether persistent broadcasts ({@code www.youtube.com/live_dashboard}) should be ignored. */
+  IGNORE_PERSISTENT_BROADCASTS("ignorePersistentBroadcasts");
 
   private String name;
 
