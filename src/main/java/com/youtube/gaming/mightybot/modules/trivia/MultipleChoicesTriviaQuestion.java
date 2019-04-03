@@ -7,6 +7,8 @@ import java.util.ListIterator;
 
 /** A trivia question that shows multiple answers that the players can choose from. */
 public class MultipleChoicesTriviaQuestion implements TriviaQuestion {
+  private static final long serialVersionUID = -809137867080301493L;
+
   private String question;
   private List<String> allAnswers;
   private Integer correctAnswerIndex;

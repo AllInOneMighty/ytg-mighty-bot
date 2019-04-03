@@ -1,7 +1,9 @@
 package com.youtube.gaming.mightybot.modules.trivia;
 
+import java.io.Serializable;
+
 /** A trivia question. */
-public interface TriviaQuestion {
+public interface TriviaQuestion extends Serializable {
   /** The question that will be shown to users. */
   String getQuestion();
 

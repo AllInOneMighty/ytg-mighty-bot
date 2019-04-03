@@ -6,6 +6,8 @@ import com.google.api.client.util.Strings;
 
 /** Thrown when an invalid configuration is detected. */
 public class InvalidConfigurationException extends RuntimeException {
+  private static final long serialVersionUID = -3423776764695705850L;
+
   /** Details about the invalid configuration. */
   private String details;
 

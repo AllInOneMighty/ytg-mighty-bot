@@ -2,6 +2,8 @@ package com.youtube.gaming.mightybot.modules.trivia;
 
 /** A trivia question to which only "{@code true}" or "{@code false}" can be answered. */
 public class BooleanTriviaQuestion implements TriviaQuestion {
+  private static final long serialVersionUID = -1107827708945155843L;
+
   private String question;
   private Boolean answer;
 

@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableList;
 
 /** A trivia question where players have to guess the answer. */
 public class GuessTriviaQuestion implements TriviaQuestion {
+  private static final long serialVersionUID = -7115857620711982094L;
+
   private String question;
   private List<String> correctAnswers;
 
