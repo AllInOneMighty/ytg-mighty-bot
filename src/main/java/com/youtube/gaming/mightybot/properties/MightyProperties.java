@@ -130,6 +130,7 @@ public final class MightyProperties {
   private void loadProperties() {
     Path propertiesPath = DynamicPath.locate(FILE_NAME);
 
+    logger.info("Reading properties from: {}", propertiesPath.toAbsolutePath());
     try (InputStream input = new FileInputStream(propertiesPath.toAbsolutePath().toFile());
         Reader reader = new InputStreamReader(input, "UTF-8")) {
       properties.load(reader);
