@@ -21,6 +21,7 @@ import com.youtube.gaming.mightybot.modules.CurrentLiveBroadcastTitle;
 import com.youtube.gaming.mightybot.modules.CurrentTime;
 import com.youtube.gaming.mightybot.modules.NewSubChatAnnouncer;
 import com.youtube.gaming.mightybot.modules.SubCount;
+import com.youtube.gaming.mightybot.modules.Trivia;
 import com.youtube.gaming.mightybot.oauth.Auth;
 import com.youtube.gaming.mightybot.properties.MightyProperties;
 import com.youtube.gaming.mightybot.properties.MightyProperty;
@@ -56,7 +57,8 @@ public class YouTubeGamingMightyBot {
         new CurrentTime(),
         new NewSubChatAnnouncer(),
         new ConcurrentViewersAndLikes(),
-        new CurrentLiveBroadcastTitle());
+        new CurrentLiveBroadcastTitle(),
+        new Trivia());
     Set<String> requiredOauthScopes = new HashSet<>();
     boolean atLeastOneModuleEnabled = false;
     for (Module module : modules) {
