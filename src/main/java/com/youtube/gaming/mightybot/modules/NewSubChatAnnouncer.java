@@ -179,7 +179,6 @@ public class NewSubChatAnnouncer extends Module {
 
   private void postNewSubscriberMessage(String liveChatId, String subscriberName,
       MightyContext context) throws IOException {
-    logger.info("Posting message for subscriber: %s", subscriberName);
     String message = messages.get(r.nextInt(messages.size()));
     LiveChatMessage content = new LiveChatMessage()
         .setSnippet(new LiveChatMessageSnippet()
