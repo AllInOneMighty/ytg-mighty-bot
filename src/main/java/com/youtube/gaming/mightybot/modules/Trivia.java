@@ -1,9 +1,5 @@
 package com.youtube.gaming.mightybot.modules;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +17,7 @@ import com.youtube.gaming.mightybot.Module;
 import com.youtube.gaming.mightybot.exceptions.InvalidConfigurationException;
 import com.youtube.gaming.mightybot.modules.trivia.TriviaQuestion;
 import com.youtube.gaming.mightybot.util.DynamicPath;
+import com.youtube.gaming.mightybot.util.ObjectStreamUtils;
 
 /**
  * Allows users in chat to play a trivia question game.
@@ -83,19 +80,7 @@ public class Trivia extends Module {
 
   public List<TriviaQuestion> readDatabase(Path dbPath) {
     logger.info("Reading Trivia database from: {}", dbPath.toAbsolutePath());
-
-    try (InputStream inputStream = new FileInputStream(dbPath.toAbsolutePath().toFile());
-        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
-      @SuppressWarnings("unchecked")
-      List<TriviaQuestion> triviaQuestions = (List<TriviaQuestion>) objectInputStream.readObject();
-      return triviaQuestions;
-    } catch (ClassNotFoundException cnfe) {
-      logger.error("Could not parse Trivia DB", cnfe);
-      throw new RuntimeException();
-    } catch (IOException e) {
-      logger.error("Could not read Trivia DB", e);
-      throw new RuntimeException();
-    }
+    return ObjectStreamUtils.readObjectStreamFromFile(dbPath);
   }
 
 //  public void postQuestion() {
