@@ -16,8 +16,8 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.common.collect.ImmutableList;
 import com.youtube.gaming.mightybot.exceptions.InvalidConfigurationException;
-import com.youtube.gaming.mightybot.modules.ConcurrentViewersAndLikes;
-import com.youtube.gaming.mightybot.modules.CurrentLiveBroadcastTitle;
+import com.youtube.gaming.mightybot.modules.MostRecentLiveBroadcastConcurrentViewersAndLikes;
+import com.youtube.gaming.mightybot.modules.MostRecentLiveBroadcastTitle;
 import com.youtube.gaming.mightybot.modules.CurrentTime;
 import com.youtube.gaming.mightybot.modules.NewSubChatAnnouncer;
 import com.youtube.gaming.mightybot.modules.SubCount;
@@ -56,8 +56,8 @@ public class YouTubeGamingMightyBot {
         new SubCount(),
         new CurrentTime(),
         new NewSubChatAnnouncer(),
-        new ConcurrentViewersAndLikes(),
-        new CurrentLiveBroadcastTitle(),
+        new MostRecentLiveBroadcastConcurrentViewersAndLikes(),
+        new MostRecentLiveBroadcastTitle(),
         new Trivia());
     Set<String> requiredOauthScopes = new HashSet<>();
     boolean atLeastOneModuleEnabled = false;
@@ -103,7 +103,7 @@ public class YouTubeGamingMightyBot {
     Clock clock = Clock.systemDefaultZone();
 
     // Start the loop
-    MightyContext context = new MightyContext(youTube, clock);
+    MightyContext context = new MightyContext(properties, youTube, clock);
     boolean loop = true;
     while(loop) {
       for (Module module : modules) {

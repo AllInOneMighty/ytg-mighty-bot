@@ -4,6 +4,7 @@ import java.time.Clock;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.common.base.Preconditions;
+import com.youtube.gaming.mightybot.properties.MightyProperties;
 
 /**
  * The mighty context in which modules are ran. Provides the {@link YouTube} API and the clock to
@@ -21,9 +22,9 @@ public class MightyContext {
    * @param youTube a connected {@link YouTube} API
    * @param clock the system clock used by the bot
    */
-  MightyContext(YouTube youTube, Clock clock) {
+  MightyContext(MightyProperties properties, YouTube youTube, Clock clock) {
     this.youTube = Preconditions.checkNotNull(youTube);
-    this.youTubeHelper = new YouTubeHelper(youTube, clock);
+    this.youTubeHelper = new YouTubeHelper(properties, youTube, clock);
     this.clock = Preconditions.checkNotNull(clock);
   }
 

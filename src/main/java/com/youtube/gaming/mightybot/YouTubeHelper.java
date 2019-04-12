@@ -12,33 +12,37 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.LiveBroadcast;
 import com.google.api.services.youtube.model.LiveBroadcastListResponse;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.youtube.gaming.mightybot.properties.MightyProperties;
+import com.youtube.gaming.mightybot.properties.MightyProperty;
 
 public class YouTubeHelper {
   private static final Logger logger = LoggerFactory.getLogger(YouTubeHelper.class);
 
   private static final long ACTIVE_BROADCASTS_REFRESH_CYCLE_MILLIS = 60000;
-  private static final long ACTIVE_PERSISTENT_BROADCASTS_REFRESH_CYCLE_MILLIS = 60000;
   private static final List<String> BROADCAST_ACTIVE_LIFE_CYCLES =
       ImmutableList.of("ready", "testing", "liveStarting", "live");
 
   private final YouTube youTube;
+  private final MightyProperties properties;
   private final Clock clock;
 
   private List<LiveBroadcast> activeBroadcasts = new ArrayList<>();
   private DateTime lastActiveBroadcastsRefresh = new DateTime(0);
-  private List<LiveBroadcast> activePersistentBroadcasts = new ArrayList<>();
-  private DateTime lastActivePersistentBroadcastsRefresh = new DateTime(0);
 
-  YouTubeHelper(YouTube youTube, Clock clock) {
+  YouTubeHelper(MightyProperties properties, YouTube youTube, Clock clock) {
     this.youTube = youTube;
+    this.properties = properties;
     this.clock = clock;
   }
 
   /**
-   * Returns all current active <i>non-persistent</i> broadcasts (also called scheduled events) on
-   * the channel. An active broadcast is in one of the {@link #BROADCAST_ACTIVE_LIFE_CYCLES} states.
-   * Returned broadcast are requested using the {@code "snippet,status"} parts.
+   * Returns all current active broadcasts on the channel, filtering out persistent broadcasts if
+   * the "{@code ignorePersistentBroadcasts}" module property is {@code true}. An active broadcast
+   * is in one of the {@link #BROADCAST_ACTIVE_LIFE_CYCLES} states, which means this method also
+   * returns broadcasts that are in the testing or starting life cycle. Returned broadcast are
+   * requested using the {@code "snippet,status"} parts.
    * <p>
    * The helper caches the list for {@link #ACTIVE_BROADCASTS_REFRESH_CYCLE_MILLIS} seconds, and
    * will hold off on refreshing the data after this time is expired until the method is called
@@ -47,54 +51,104 @@ public class YouTubeHelper {
    * This method will only work in a module that requested the
    * {@code https://www.googleapis.com/auth/youtube} OAuth scope.
    *
-   * @return a list of active <i>non-persistent</i> broadcasts, empty if there is none
+   * @return a list of active broadcasts, empty if there is none
    * @throws IOException if an error occurred while contacting YouTube
    */
   public List<LiveBroadcast> getActiveBroadcasts() throws IOException {
     if (clock.millis()
         - lastActiveBroadcastsRefresh.getValue() > ACTIVE_BROADCASTS_REFRESH_CYCLE_MILLIS) {
-      logger.debug("Refreshing active non-persistent broadcasts");
+      logger.debug("Refreshing active broadcasts (ignoring persistent: {})",
+          shouldIgnorePersistentBroadcasts());
       YouTube.LiveBroadcasts.List activeRequest = youTube.liveBroadcasts().list("snippet,status");
       activeRequest.setBroadcastStatus("active");
+      if (shouldIgnorePersistentBroadcasts()) {
+        activeRequest.setBroadcastType("event");
+      } else {
+        activeRequest.setBroadcastType("all");
+      }
       LiveBroadcastListResponse activeResponse = activeRequest.execute();
 
       activeBroadcasts = getActiveBroadcasts(activeResponse.getItems());
       lastActiveBroadcastsRefresh = new DateTime(clock.millis());
-      logger.info("Found {} active non-persistent broadcast(s)", activeBroadcasts.size());
+      logger.info("Found {} active broadcast(s)", activeBroadcasts.size());
     }
     return activeBroadcasts;
   }
 
   /**
-   * Returns all current active <i>persistent</i> broadcasts on the channel. An active broadcast is
-   * in one of the {@link #BROADCAST_ACTIVE_LIFE_CYCLES} states. Returned broadcast are requested
-   * using the {@code "snippet,status"} parts.
+   * Returns the most recent live broadcast. A live broadcast is a broadcast that is currently
+   * being streamed too. This method does not return broadcasts that are in the ready, testing or
+   * starting life cycle.
    * <p>
-   * The helper caches the list for {@link #ACTIVE_PERSISTENT_BROADCASTS_REFRESH_CYCLE_MILLIS}
-   * seconds, and will hold off on refreshing the data after this time is expired until the method
-   * is called again.
+   * This method uses the same cache described in {@link #getActiveBroadcasts()}.
    * <p>
    * This method will only work in a module that requested the
    * {@code https://www.googleapis.com/auth/youtube} OAuth scope.
    *
-   * @return a list of active <i>persistent</i> broadcasts, empty if there is none
+   * @return the most recent live broadcast
    * @throws IOException if an error occurred while contacting YouTube
    */
-  public List<LiveBroadcast> getActivePersistentBroadcasts() throws IOException {
-    if (clock.millis() - lastActivePersistentBroadcastsRefresh
-        .getValue() > ACTIVE_PERSISTENT_BROADCASTS_REFRESH_CYCLE_MILLIS) {
-      logger.debug("Refreshing active persistent broadcasts");
-      YouTube.LiveBroadcasts.List persistentRequest =
-          youTube.liveBroadcasts().list("snippet,status");
-      persistentRequest.setBroadcastType("persistent");
-      persistentRequest.setMine(Boolean.TRUE);
-      LiveBroadcastListResponse persistentResponse = persistentRequest.execute();
-
-      activePersistentBroadcasts = getActiveBroadcasts(persistentResponse.getItems());
-      lastActivePersistentBroadcastsRefresh = new DateTime(clock.millis());
-      logger.info("Found {} active persistent broadcast(s)", activePersistentBroadcasts.size());
+  public Optional<LiveBroadcast> getMostRecentLiveBroadcast() throws IOException {
+    LiveBroadcast broadcast = null;
+    for (LiveBroadcast activeBroadcast : getActiveBroadcasts()) {
+      if (!activeBroadcast.getStatus().getLifeCycleStatus().equals("live")) {
+        continue;
+      }
+      if (broadcast == null || broadcast.getSnippet().getActualStartTime()
+          .getValue() < activeBroadcast.getSnippet().getActualStartTime().getValue()) {
+        broadcast = activeBroadcast;
+      }
     }
-    return activePersistentBroadcasts;
+    return Optional.fromNullable(broadcast);
+  }
+
+  /**
+   * Returns all live chat ids for currently active broadcasts. An active broadcast is in one of the
+   * {@link #BROADCAST_ACTIVE_LIFE_CYCLES} states, which means this method also returns broadcasts
+   * that are in the testing or starting life cycle.
+   * <p>
+   * This method uses the same cache described in {@link #getActiveBroadcasts()}.
+   * <p>
+   * This method will only work in a module that requested the
+   * {@code https://www.googleapis.com/auth/youtube} OAuth scope.
+   *
+   * @return a list of active live chat ids, or an empty list if no active broadcast is detected
+   * @throws IOException if an error occurred while contacting YouTube
+   */
+  public List<String> getActiveLiveChatIds() throws IOException {
+    List<String> activeLiveChatIds = new ArrayList<>();
+    for (LiveBroadcast liveBroadcast : getActiveBroadcasts()) {
+      activeLiveChatIds.add(liveBroadcast.getSnippet().getLiveChatId());
+    }
+    return activeLiveChatIds;
+  }
+
+  /**
+   * Returns the live chat id of the most recent live broadcast. A live broadcast is a broadcast
+   * that is currently being streamed too. This method does not return broadcasts that are in the
+   * ready, testing or starting life cycle.
+   * <p>
+   * This method uses the same cache described in {@link #getActiveBroadcasts()}.
+   * <p>
+   * This method will only work in a module that requested the
+   * {@code https://www.googleapis.com/auth/youtube} OAuth scope.
+   *
+   * @return the most recent live broadcast live chat id, or an absent optional if no live broadcast
+   *         is detected
+   * @throws IOException if an error occurred while contacting YouTube
+   */
+  public Optional<String> getMostRecentLiveBroadcastLiveChatId() throws IOException {
+    Optional<LiveBroadcast> liveBroadcast = getMostRecentLiveBroadcast();
+    if (!liveBroadcast.isPresent()) {
+      return Optional.absent();
+    }
+
+    return Optional.of(liveBroadcast.get().getSnippet().getLiveChatId());
+  }
+
+  private boolean shouldIgnorePersistentBroadcasts() {
+    return "true"
+        .equalsIgnoreCase(properties.get(MightyProperty.IGNORE_PERSISTENT_BROADCASTS));
   }
 
   private List<LiveBroadcast> getActiveBroadcasts(List<LiveBroadcast> liveBroadcasts) {

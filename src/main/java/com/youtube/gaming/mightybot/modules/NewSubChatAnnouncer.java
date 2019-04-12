@@ -15,13 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.LiveBroadcast;
 import com.google.api.services.youtube.model.LiveChatMessage;
 import com.google.api.services.youtube.model.LiveChatMessageSnippet;
 import com.google.api.services.youtube.model.LiveChatTextMessageDetails;
 import com.google.api.services.youtube.model.Subscription;
 import com.google.api.services.youtube.model.SubscriptionListResponse;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.youtube.gaming.mightybot.MightyContext;
 import com.youtube.gaming.mightybot.Module;
@@ -29,9 +27,9 @@ import com.youtube.gaming.mightybot.exceptions.InvalidConfigurationException;
 import com.youtube.gaming.mightybot.properties.MightyProperty;
 
 /**
- * Posts a message in chat on behalf of the user when someone subscribes to the channel. Saves the
- * names of the new subscribers while the bot is running to avoid announcing the same name several
- * times. This list is reset when the bot is stopped.
+ * Posts a message in chat on all currently active broadcasts on behalf of the user when someone
+ * subscribes to the channel. Saves the names of the new subscribers while the bot is running to
+ * avoid announcing the same name several times. This list is reset when the bot is stopped.
  */
 public class NewSubChatAnnouncer extends Module {
   private static final Logger logger = LoggerFactory.getLogger(NewSubChatAnnouncer.class);
@@ -44,7 +42,6 @@ public class NewSubChatAnnouncer extends Module {
   private Set<String> alreadySubscribedCache = new HashSet<String>();
   private List<String> messages;
   private DateTime lastPublishedAt;
-  private ImmutableList<String> liveChatIds = ImmutableList.of();
 
   @Override
   public void checkProperties() throws InvalidConfigurationException {
@@ -87,24 +84,16 @@ public class NewSubChatAnnouncer extends Module {
     List<String> newSubscribers = getNewSubscribers(context);
 
     if (!newSubscribers.isEmpty()) {
-      updateActiveLiveChatIds(context);
-
-      if (liveChatIds.isEmpty()) {
-        if (shouldIgnorePersistentBroadcasts()) {
-          logger.info(
-              "No active chat where to announce new subs, are you live streaming to a persistent "
-                  + "broadcast?");
-        } else {
-          logger.info(
-              "No active chat where to announce new subs");
-        }
+      List<String> activeLiveChatIds = context.youTubeHelper().getActiveLiveChatIds();
+      if (activeLiveChatIds.isEmpty()) {
+        logger.info("No active chat where to announce new subs");
         return;
       }
 
       // For each new subscriber, post to all chats
       for (String newSubscriber : newSubscribers) {
         if (!alreadySubscribedCache.contains(newSubscriber)) {
-          for (String liveChatId : liveChatIds) {
+          for (String liveChatId : activeLiveChatIds) {
             postNewSubscriberMessage(liveChatId, newSubscriber, context);
           }
           alreadySubscribedCache.add(newSubscriber);
@@ -147,35 +136,6 @@ public class NewSubChatAnnouncer extends Module {
     return newSubscribers;
   }
 
-  private void updateActiveLiveChatIds(MightyContext context) {
-    try {
-      List<String> activeLiveChatIds = new ArrayList<>();
-
-      if (!shouldIgnorePersistentBroadcasts()) {
-        // Persistent broadcasts
-        List<LiveBroadcast> activePermanentBroadcasts =
-            context.youTubeHelper().getActivePersistentBroadcasts();
-        activeLiveChatIds.addAll(getLiveChatIds(activePermanentBroadcasts));
-      }
-
-      // Active broadcasts
-      List<LiveBroadcast> activeBroadcasts = context.youTubeHelper().getActiveBroadcasts();
-      activeLiveChatIds.addAll(getLiveChatIds(activeBroadcasts));
-
-      liveChatIds = ImmutableList.copyOf(activeLiveChatIds);
-    } catch (IOException e) {
-      logger.error("Could not refresh live chat ids", e);
-    }
-  }
-
-  private List<String> getLiveChatIds(List<LiveBroadcast> liveBroadcasts) {
-    List<String> recordingLiveChatIds = new ArrayList<>();
-    for (LiveBroadcast liveBroadcast : liveBroadcasts) {
-      recordingLiveChatIds.add(liveBroadcast.getSnippet().getLiveChatId());
-    }
-    return recordingLiveChatIds;
-  }
-
   private void postNewSubscriberMessage(String liveChatId, String subscriberName,
       MightyContext context) throws IOException {
     String message = messages.get(r.nextInt(messages.size()));
@@ -190,10 +150,5 @@ public class NewSubChatAnnouncer extends Module {
         context.youTube().liveChatMessages().insert("snippet", content);
 
     request.execute();
-  }
-
-  private boolean shouldIgnorePersistentBroadcasts() {
-    return "true"
-        .equalsIgnoreCase(getProperties().get(MightyProperty.IGNORE_PERSISTENT_BROADCASTS));
   }
 }

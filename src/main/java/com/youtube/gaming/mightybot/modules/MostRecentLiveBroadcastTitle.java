@@ -1,12 +1,10 @@
 package com.youtube.gaming.mightybot.modules;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -25,8 +23,8 @@ import com.youtube.gaming.mightybot.util.ModuleUtils;
 /**
  * Outputs the most recent live broadcast title to a file.
  */
-public class CurrentLiveBroadcastTitle extends Module {
-  private static final Logger logger = LoggerFactory.getLogger(CurrentLiveBroadcastTitle.class);
+public class MostRecentLiveBroadcastTitle extends Module {
+  private static final Logger logger = LoggerFactory.getLogger(MostRecentLiveBroadcastTitle.class);
 
   private static final String CURRENT_LIVE_BROADCAST_TITLE_OUTPUT_FILE =
       "currentLiveBroadcastTitle.outputFile";
@@ -68,12 +66,13 @@ public class CurrentLiveBroadcastTitle extends Module {
 
   @Override
   public void run(MightyContext context) throws Exception {
-    LiveBroadcast mostRecentLiveBroadcast = getMostRecentLiveBroadcast(context);
+    Optional<LiveBroadcast> mostRecentLiveBroadcast =
+        context.youTubeHelper().getMostRecentLiveBroadcast();
     String title = "";
-    if (mostRecentLiveBroadcast == null) {
-      logger.info("No live broadcast found (an active broadcast isn't necessarily live).");
+    if (mostRecentLiveBroadcast.isPresent()) {
+      title = mostRecentLiveBroadcast.get().getSnippet().getTitle();
     } else {
-      title = mostRecentLiveBroadcast.getSnippet().getTitle();
+      logger.info("No live broadcast found (an active broadcast isn't necessarily live).");
     }
 
     try (BufferedWriter writer = Files.newBufferedWriter(currentVideoTitleOutputPath)) {
@@ -81,27 +80,6 @@ public class CurrentLiveBroadcastTitle extends Module {
     } catch (FileSystemException e) {
       logger.warn("Output writing of current live broadcast title failed. Skipping...", e);
     }
-  }
-
-  private LiveBroadcast getMostRecentLiveBroadcast(MightyContext context) throws IOException {
-    LiveBroadcast mostRecentLiveBroadcast =
-        getMostRecentLiveBroadcast(null, context.youTubeHelper().getActiveBroadcasts());
-    return getMostRecentLiveBroadcast(mostRecentLiveBroadcast,
-        context.youTubeHelper().getActivePersistentBroadcasts());
-  }
-
-  private LiveBroadcast getMostRecentLiveBroadcast(LiveBroadcast broadcast,
-      List<LiveBroadcast> activeBroadcasts) {
-    for (LiveBroadcast activeBroadcast : activeBroadcasts) {
-      if (!activeBroadcast.getStatus().getLifeCycleStatus().equals("live")) {
-        continue;
-      }
-      if (broadcast == null || broadcast.getSnippet().getActualStartTime()
-          .getValue() < activeBroadcast.getSnippet().getActualStartTime().getValue()) {
-        broadcast = activeBroadcast;
-      }
-    }
-    return broadcast;
   }
 
 }
