@@ -15,9 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.LiveChatMessage;
-import com.google.api.services.youtube.model.LiveChatMessageSnippet;
-import com.google.api.services.youtube.model.LiveChatTextMessageDetails;
 import com.google.api.services.youtube.model.Subscription;
 import com.google.api.services.youtube.model.SubscriptionListResponse;
 import com.google.common.collect.ImmutableSet;
@@ -138,17 +135,9 @@ public class NewSubChatAnnouncer extends Module {
 
   private void postNewSubscriberMessage(String liveChatId, String subscriberName,
       MightyContext context) throws IOException {
-    String message = messages.get(r.nextInt(messages.size()));
-    LiveChatMessage content = new LiveChatMessage()
-        .setSnippet(new LiveChatMessageSnippet()
-            .setLiveChatId(liveChatId)
-            .setType("textMessageEvent")
-            .setTextMessageDetails(new LiveChatTextMessageDetails()
-                .setMessageText(message.replace("{name}", subscriberName))));
+    String messageFormat = messages.get(r.nextInt(messages.size()));
+    String message = messageFormat.replace("{name}", subscriberName);
 
-    YouTube.LiveChatMessages.Insert request =
-        context.youTube().liveChatMessages().insert("snippet", content);
-
-    request.execute();
+    context.youTubeHelper().postTextMessageToLiveChat(liveChatId, message);
   }
 }

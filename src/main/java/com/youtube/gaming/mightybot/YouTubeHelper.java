@@ -12,6 +12,9 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.LiveBroadcast;
 import com.google.api.services.youtube.model.LiveBroadcastListResponse;
+import com.google.api.services.youtube.model.LiveChatMessage;
+import com.google.api.services.youtube.model.LiveChatMessageSnippet;
+import com.google.api.services.youtube.model.LiveChatTextMessageDetails;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.youtube.gaming.mightybot.properties.MightyProperties;
@@ -144,6 +147,27 @@ public class YouTubeHelper {
     }
 
     return Optional.of(liveBroadcast.get().getSnippet().getLiveChatId());
+  }
+
+  /**
+   * Posts the given text message to live chat with the provided id.
+   *
+   * @param liveChatId id of the live chat where to post the message
+   * @param message the message to post
+   * @throws IOException if an error occurred while contacting YouTube
+   */
+  public void postTextMessageToLiveChat(String liveChatId, String message) throws IOException {
+    LiveChatMessage content = new LiveChatMessage()
+        .setSnippet(new LiveChatMessageSnippet()
+            .setLiveChatId(liveChatId)
+            .setType("textMessageEvent")
+            .setTextMessageDetails(new LiveChatTextMessageDetails()
+                .setMessageText(message)));
+
+    YouTube.LiveChatMessages.Insert request =
+        youTube.liveChatMessages().insert("snippet", content);
+
+    request.execute();
   }
 
   private boolean shouldIgnorePersistentBroadcasts() {
